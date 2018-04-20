@@ -60,6 +60,8 @@ namespace MemoryProgrammer.IC
 
             for (int i = 7; i >= 0; i--) // byte 00 - 01 = ff
                 pSPI.spi_bit_tx((byte)((memAddress >> i) & 1));
+            
+            pSPI.spi_bit_tx(0); //dummy 1 cycle (always zero)
 
             UInt32 rx = 0;
             for (int i = 15; i >= 0; i--)
@@ -90,6 +92,8 @@ namespace MemoryProgrammer.IC
             pSPI.spi_clr_cs();
 
             pSPI.spi_bit_tx(0); //dummy 1 cycle
+
+            pSPI.spi_clr_cs();
 
             for (int j = 0; j < 3; j++)//wait for 9*3 clock cycles
             {

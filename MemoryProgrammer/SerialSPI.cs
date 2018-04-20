@@ -23,11 +23,11 @@ namespace MemoryProgrammer
 
         public SerialSPI(string portAddress, int speed)
         {
-            periode = (int)(1000000 / speed);
-            if (periode < 10) periode = 10;
-            if (periode > 10000000) periode = 10000000; //10S
+            //periode = (int)(1000000 / speed);
+            //if (periode < 10) periode = 10;
+            //if (periode > 10000000) periode = 10000000; //10S
 
-            koneksiSerial = new SerialPort(portAddress, 50);
+            koneksiSerial = new SerialPort(portAddress, speed);
             //koneksiSerial.Handshake = Handshake.None;
             //koneksiSerial.WriteTimeout = 500;
             //koneksiSerial.ReadTimeout = 500;
@@ -48,8 +48,13 @@ namespace MemoryProgrammer
 
         public void close()
         {
+
             if (koneksiSerial.IsOpen)
+            {
+                koneksiSerial.DiscardOutBuffer();
+                while (koneksiSerial.BytesToWrite > 0) { delay_us(periode); }
                 koneksiSerial.Close();
+            }
         }
 
         //public enum BIT { LOW, HIGH };
@@ -91,7 +96,7 @@ namespace MemoryProgrammer
 
             //TODO
             if (activeCS == BIT.HIGH) 
-                csbytetx[0] = 0; 
+                csbytetx[0] = 0x00; 
             else
                 csbytetx[0] = 0xff;
         }
@@ -100,22 +105,28 @@ namespace MemoryProgrammer
         {
             //TODO
             koneksiSerial.Write(csbytetx, 0, 1);
-            Thread.Sleep(30); //wait for rising byte
+            Thread.Sleep(25); //wait for rising byte
+            if (activeCS == BIT.LOW)
+                Thread.Sleep(30); //wait for rising byte
         }
 
         public void spi_clr_cs()
         {
             //TODO
-            byte[] icsbytetx = {0};
-            icsbytetx[0] = (byte)((csbytetx[0] ^ csbytetx[0])& 0xff);
-            koneksiSerial.Write(csbytetx, 0, 1);
-            Thread.Sleep(10); //wait for falling byte
+            //byte[] icsbytetx = {0};
+            //icsbytetx[0] = (byte)((csbytetx[0] ^ csbytetx[0])& 0xff);
+            //koneksiSerial.Write(csbytetx, 0, 1);
+            //Thread.Sleep(10); //wait for falling byte
+            if (activeSCK == BIT.HIGH)
+                koneksiSerial.RtsEnable = false;
+            else
+                koneksiSerial.RtsEnable = true;
+
         }
         public byte spi_bit_rx() { return 0; }
         public void spi_bit_tx(byte bit)
         {
             koneksiSerial.DtrEnable = (bit == 1) ? true : false; //DI 1/0
-            spi_set_cs(); //CS Enable
 
             //low state
             if (Sampling_edge == EDGE.RISING)
@@ -138,7 +149,6 @@ namespace MemoryProgrammer
                 koneksiSerial.RtsEnable = false; //SCK = 0
                 delay_us(periode); // >450ns TCKL
             }
-            spi_clr_cs();
             delay_us(periode);
         }
 

@@ -155,7 +155,7 @@
             this.txtAlamat.Name = "txtAlamat";
             this.txtAlamat.Size = new System.Drawing.Size(90, 20);
             this.txtAlamat.TabIndex = 5;
-            this.txtAlamat.Text = "com22";
+            this.txtAlamat.Text = "888";
             // 
             // label6
             // 

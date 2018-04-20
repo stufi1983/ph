@@ -212,7 +212,10 @@ namespace MemoryProgrammer
                 try { ic.StartTransfer(); }
                 catch (Exception err) { MessageBox.Show(err.Message); return; }
 
-                ic.EEPROM_93C66_writeAll(ref split);
+                //ic.EEPROM_93C66_writeAll(ref split);
+                ic.EEPROM_93C66_spi_ewen();
+                Thread.Sleep(1);
+                ic.EEPROM_93C66_spi_send_data(0, 0xaa12);
                 ic.StopTransfer();
             }
         }
@@ -254,13 +257,16 @@ namespace MemoryProgrammer
         void tampilkanData(string data)
         {
             textBoxString.Text = data.Trim();
-        }
+        }
+
         private void cmbPort_SelectedIndexChanged(object sender, EventArgs e)
         {
             cmbIC.Items.Clear();
 
             if (cmbPort.SelectedItem.ToString() == Ports[0])
             {
+                txtSpeed.Text = "8";
+                txtAlamat.Text = "888";
                 label5.Text = "Byte/s";
                 foreach (String dev in ParDev)
                     cmbIC.Items.Add(dev);
@@ -269,6 +275,11 @@ namespace MemoryProgrammer
             if (cmbPort.SelectedItem.ToString() == Ports[1]
                 || cmbPort.SelectedItem.ToString() == Ports[2])
             {
+                txtSpeed.Text = "1000";
+                if (cmbPort.SelectedItem.ToString() == Ports[1])
+                    txtAlamat.Text = "888";
+                if (cmbPort.SelectedItem.ToString() == Ports[1])
+                    txtAlamat.Text = "COM1";
                 label5.Text = "Hertz";
                 foreach (String dev in SPIDev)
                     cmbIC.Items.Add(dev);
@@ -276,6 +287,8 @@ namespace MemoryProgrammer
             }
             if (cmbPort.SelectedItem.ToString() == Ports[3])
             {
+                txtSpeed.Text = "57600";
+                txtAlamat.Text = "COM1";
                 label5.Text = "bps";
                 foreach (String dev in SerDev)
                     cmbIC.Items.Add(dev);
@@ -285,6 +298,28 @@ namespace MemoryProgrammer
 
         private void btnRead_Click(object sender, EventArgs e)
         {
+            if (cmbPort.SelectedItem.ToString() == null)
+            {
+                MessageBox.Show("Port belum dipilih");
+                return;
+            }
+            selectedPorts = cmbPort.SelectedItem.ToString();
+
+            if (cmbIC.SelectedItem.ToString() == null)
+            {
+                MessageBox.Show("IC belum dipilih");
+                return;
+            }
+
+            selectedIC = cmbIC.SelectedItem.ToString();
+            portName = txtAlamat.Text;
+            int.TryParse(txtAlamat.Text, out portAddress);
+            Double.TryParse(txtSpeed.Text, out kecepatan);
+            int interval = (int)(1000 / kecepatan);
+            if (interval <= 0) interval = 1;
+            timer1.Interval = interval;
+
+
             if (cmbPort.SelectedItem.ToString() == Ports[3]) //Serial
             {
                 ReadWriteThread = new Thread(ReadDataSerialThread);
@@ -312,13 +347,15 @@ namespace MemoryProgrammer
                 try { ic.StartTransfer(); }
                 catch (Exception err) { MessageBox.Show(err.Message); return; }
 
-                hex = "";
+                hex = ""; 
                 for (int x = 0; x < 256; x++)
                 {
                     UInt32 val = ic.EEPROM_93C66_spi_read_data(x);
                     hex += val.ToString("X4");
                 }
                 ic.StopTransfer();
+                this.BeginInvoke(new SetTextDeleg(tampilkanData),
+                new object[] { hex });
             }
         }
 

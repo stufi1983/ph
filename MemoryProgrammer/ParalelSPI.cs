@@ -93,8 +93,8 @@ namespace MemoryProgrammer
                 x = 0;
                 x |= CS_bit; //x |= 0x01; //CS 1
                 parPort.SendByte(x);
-                val = parPort.GetByte();
                 delay_us(periode); // >450ns TCKL
+                val = parPort.GetByte();
             }
 
             //stand state
@@ -110,8 +110,8 @@ namespace MemoryProgrammer
                 x = 0;
                 x |= CS_bit; //x |= 0x01; //CS 1
                 parPort.SendByte(x);
-                val = parPort.GetByte();
                 delay_us(periode); // >450ns TCKL
+                val = parPort.GetByte();
             }
             return val;
         }
@@ -150,7 +150,9 @@ namespace MemoryProgrammer
 
         public void spi_clr_cs()
         {
-            parPort.SendByte(CS_bit);
+            int byteVal = 0;
+            byteVal |= (CS_bit ^ 0x01);
+            parPort.SendByte(byteVal);
             delay_us(periode); // >450 TCSH
         }
 

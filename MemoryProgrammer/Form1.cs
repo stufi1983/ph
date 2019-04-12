@@ -136,7 +136,9 @@ namespace MemoryProgrammer
             selectedIC = cmbIC.SelectedItem.ToString();
             portName = txtAlamat.Text;
             int.TryParse(txtAlamat.Text, out portAddress);
+            if (portAddress <= 0) portAddress = 888;
             Double.TryParse(txtSpeed.Text, out kecepatan);
+            if (kecepatan <= 0) kecepatan = 1;
             int interval = (int)(1000 / kecepatan);
             if (interval <= 0) interval = 1;
             timer1.Interval = interval;
@@ -212,11 +214,14 @@ namespace MemoryProgrammer
                 try { ic.StartTransfer(); }
                 catch (Exception err) { MessageBox.Show(err.Message); return; }
 
-                //ic.EEPROM_93C66_writeAll(ref split);
+                timer1.Enabled = true;
                 ic.EEPROM_93C66_spi_ewen();
                 Thread.Sleep(1);
-                ic.EEPROM_93C66_spi_send_data(0, 0xaa12);
+                //write all
+                ic.EEPROM_93C66_writeAll(ref split);
+
                 ic.StopTransfer();
+                progress = 100;
             }
         }
 
@@ -225,7 +230,16 @@ namespace MemoryProgrammer
 
             int portAddress = 888;
             int.TryParse(txtAlamat.Text, out portAddress);
+            if (portAddress < 1) portAddress = 888;
             parPort.Address = portAddress;
+
+            String initRes = "";
+            initRes = parPort.init();
+            if (initRes != "")
+            {
+                MessageBox.Show(initRes);
+                return;
+            }
 
             string[] split = new string[hex.Length / 2 + (hex.Length % 2 == 0 ? 0 : 1)];
             for (int i = 0; i < split.Length; i++)
@@ -237,8 +251,8 @@ namespace MemoryProgrammer
             {
                 int bytes = Convert.ToInt32(split[i], 16);
                 parPort.SendByte(bytes);
-                System.Threading.Thread.Sleep(timer1.Interval);
                 progress = (int)(i * 100 / split.Length);
+                System.Threading.Thread.Sleep(timer1.Interval);
             }
             progress = 100;
         }
@@ -329,7 +343,7 @@ namespace MemoryProgrammer
             {
                 ReadWriteThread = new Thread(ReadDataSPIThread);
             }
-            ReadWriteThread.Start();
+            if(ReadWriteThread!=null) ReadWriteThread.Start();
             timer1.Enabled = true;
         }
         void ReadDataSPIThread() //ReadSerial/ParSPI

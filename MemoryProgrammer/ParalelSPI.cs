@@ -58,10 +58,11 @@ namespace MemoryProgrammer
             periode = (int)(1000000 / speed);
             if (periode < 10) periode = 10;
             if (periode > 10000000) periode = 10000000; //10S
-
         }
         public void open() 
-        { 
+        {
+            String res = parPort.init();
+            if (res != "") throw new Exception(res);
             //TODO
             //return true;
         }

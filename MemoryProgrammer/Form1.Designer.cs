@@ -45,12 +45,13 @@
             this.txtSpeed = new System.Windows.Forms.TextBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.button4 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(33, 113);
+            this.label1.Location = new System.Drawing.Point(531, 118);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(38, 13);
             this.label1.TabIndex = 0;
@@ -59,7 +60,7 @@
             // cmbIC
             // 
             this.cmbIC.FormattingEnabled = true;
-            this.cmbIC.Location = new System.Drawing.Point(97, 110);
+            this.cmbIC.Location = new System.Drawing.Point(575, 115);
             this.cmbIC.Name = "cmbIC";
             this.cmbIC.Size = new System.Drawing.Size(100, 21);
             this.cmbIC.TabIndex = 1;
@@ -86,7 +87,7 @@
             // cmbPort
             // 
             this.cmbPort.FormattingEnabled = true;
-            this.cmbPort.Location = new System.Drawing.Point(97, 63);
+            this.cmbPort.Location = new System.Drawing.Point(117, 62);
             this.cmbPort.Name = "cmbPort";
             this.cmbPort.Size = new System.Drawing.Size(100, 21);
             this.cmbPort.TabIndex = 1;
@@ -95,7 +96,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(218, 113);
+            this.label4.Location = new System.Drawing.Point(33, 119);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(59, 13);
             this.label4.TabIndex = 0;
@@ -104,7 +105,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(360, 113);
+            this.label5.Location = new System.Drawing.Point(178, 119);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(32, 13);
             this.label5.TabIndex = 0;
@@ -126,12 +127,12 @@
             this.textBoxString.Multiline = true;
             this.textBoxString.Name = "textBoxString";
             this.textBoxString.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxString.Size = new System.Drawing.Size(356, 153);
+            this.textBoxString.Size = new System.Drawing.Size(639, 153);
             this.textBoxString.TabIndex = 4;
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(160, 365);
+            this.button2.Location = new System.Drawing.Point(447, 365);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(102, 23);
             this.button2.TabIndex = 3;
@@ -141,7 +142,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(268, 365);
+            this.button3.Location = new System.Drawing.Point(555, 365);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(124, 23);
             this.button3.TabIndex = 3;
@@ -151,16 +152,16 @@
             // 
             // txtAlamat
             // 
-            this.txtAlamat.Location = new System.Drawing.Point(302, 63);
+            this.txtAlamat.Location = new System.Drawing.Point(117, 90);
             this.txtAlamat.Name = "txtAlamat";
-            this.txtAlamat.Size = new System.Drawing.Size(90, 20);
+            this.txtAlamat.Size = new System.Drawing.Size(100, 20);
             this.txtAlamat.TabIndex = 5;
             this.txtAlamat.Text = "888";
             // 
             // label6
             // 
             this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(218, 66);
+            this.label6.Location = new System.Drawing.Point(33, 93);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(78, 13);
             this.label6.TabIndex = 0;
@@ -168,7 +169,7 @@
             // 
             // txtSpeed
             // 
-            this.txtSpeed.Location = new System.Drawing.Point(302, 110);
+            this.txtSpeed.Location = new System.Drawing.Point(117, 116);
             this.txtSpeed.Name = "txtSpeed";
             this.txtSpeed.Size = new System.Drawing.Size(55, 20);
             this.txtSpeed.TabIndex = 5;
@@ -182,14 +183,25 @@
             // 
             this.progressBar1.Location = new System.Drawing.Point(36, 321);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(356, 23);
+            this.progressBar1.Size = new System.Drawing.Size(639, 23);
             this.progressBar1.TabIndex = 6;
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(302, 365);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(139, 23);
+            this.button4.TabIndex = 7;
+            this.button4.Text = "Hapus Buffer";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(432, 400);
+            this.ClientSize = new System.Drawing.Size(710, 400);
+            this.Controls.Add(this.button4);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.txtSpeed);
             this.Controls.Add(this.txtAlamat);
@@ -232,6 +244,7 @@
         private System.Windows.Forms.TextBox txtSpeed;
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Button button4;
     }
 }
 

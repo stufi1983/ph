@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Diagnostics;
 
-
+using System.ComponentModel.Design;
 
 namespace MemoryProgrammer
 {
@@ -38,9 +38,21 @@ namespace MemoryProgrammer
         ParallelPort parPort = new ParallelPort();
         SerialPort ReadDataSerial;
 
+        private System.ComponentModel.Design.ByteViewer byteviewer;
+
         public Form1()
         {
             InitializeComponent();
+
+            // Initialize the ByteViewer.
+            byteviewer = new ByteViewer();
+
+            byteviewer.Location = textBoxString.Location;// new Point(8, 46);
+            byteviewer.Size = textBoxString.Size;// new Size(600, 338);
+            byteviewer.Anchor = AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Top;
+            byteviewer.SetBytes(new byte[] { });
+            this.Controls.Add(byteviewer);
+            textBoxString.Visible = false;
         }
         private void btnBukaFile_Click(object sender, EventArgs e)
         {
@@ -71,6 +83,7 @@ namespace MemoryProgrammer
                 try
                 {
                     readDataFromFile(openFileDialog1.FileName);
+                    byteviewer.SetFile(openFileDialog1.FileName);
                 }
                 catch (Exception ex)
                 {
@@ -114,7 +127,8 @@ namespace MemoryProgrammer
         private void btnWrite_Click(object sender, EventArgs e)
         {
             ConvertHextoBytes();
-            if (textBoxString.Text == "")
+            //if (textBoxString.Text == "")
+            if(byteviewer.GetBytes().Length<1)
             {
                 MessageBox.Show("File belum dibuka");
                 return;
@@ -168,7 +182,10 @@ namespace MemoryProgrammer
             try
             {
                 koneksiSerial.Open();
+                byte[] bytes = byteviewer.GetBytes();
+                hex = BitConverter.ToString(bytes).Replace("-", string.Empty);
                 int length = hex.Length;
+
                 int i = 0;
                 while (i < length)
                 {
@@ -205,11 +222,11 @@ namespace MemoryProgrammer
                 else
                     return;
 
-                string[] split = new string[hex.Length / 2 + (hex.Length % 2 == 0 ? 0 : 1)];
-                for (int i = 0; i < split.Length; i++)
-                {
-                    split[i] = hex.Substring(i * 2, i * 2 + 2 > hex.Length ? 1 : 2);
-                }
+                //string[] split = new string[hex.Length / 2 + (hex.Length % 2 == 0 ? 0 : 1)];
+                //for (int i = 0; i < split.Length; i++)
+                //{
+                //    split[i] = hex.Substring(i * 2, i * 2 + 2 > hex.Length ? 1 : 2);
+                //}
 
                 try { ic.StartTransfer(); }
                 catch (Exception err) { MessageBox.Show(err.Message); return; }
@@ -217,9 +234,19 @@ namespace MemoryProgrammer
                 timer1.Enabled = true;
                 ic.EEPROM_93C66_spi_ewen();
                 Thread.Sleep(1);
-                //write all
-                ic.EEPROM_93C66_writeAll(ref split);
 
+                //write all
+                //ic.EEPROM_93C66_writeAll(ref split);
+                byte[] bytes = byteviewer.GetBytes();
+                for(int x = 0;x<bytes.Length;x+=2)
+                {
+                    int data = 0;
+                    data = data | bytes[x];
+                    data = data << 8;
+                    data = data | bytes[x+1];
+                    ic.EEPROM_93C66_spi_send_data(x,data);
+                    progress = x * 100 / bytes.Length;
+                }
                 ic.StopTransfer();
                 progress = 100;
             }
@@ -241,19 +268,26 @@ namespace MemoryProgrammer
                 return;
             }
 
-            string[] split = new string[hex.Length / 2 + (hex.Length % 2 == 0 ? 0 : 1)];
-            for (int i = 0; i < split.Length; i++)
-            {
-                split[i] = hex.Substring(i * 2, i * 2 + 2 > hex.Length ? 1 : 2);
-            }
+            //string[] split = new string[hex.Length / 2 + (hex.Length % 2 == 0 ? 0 : 1)];
+            //for (int i = 0; i < split.Length; i++)
+            //{
+            //    split[i] = hex.Substring(i * 2, i * 2 + 2 > hex.Length ? 1 : 2);
+            //}
 
-            for (int i = 0; i < split.Length; i++)
-            {
-                int bytes = Convert.ToInt32(split[i], 16);
-                parPort.SendByte(bytes);
-                progress = (int)(i * 100 / split.Length);
+            //for (int i = 0; i < split.Length; i++)
+            //{
+            //    int bytes = Convert.ToInt32(split[i], 16);
+            //    parPort.SendByte(bytes);
+            //    progress = (int)(i * 100 / split.Length);
+            //    System.Threading.Thread.Sleep(timer1.Interval);
+            //}
+            byte[] b = byteviewer.GetBytes();
+            for (int i = 0; i < b.Length; i++) {
+                parPort.SendByte((int)b[i]);
+                progress = (int)(i * 100 / b.Length);
                 System.Threading.Thread.Sleep(timer1.Interval);
             }
+
             progress = 100;
         }
 
@@ -271,6 +305,7 @@ namespace MemoryProgrammer
         void tampilkanData(string data)
         {
             textBoxString.Text = data.Trim();
+
         }
 
         private void cmbPort_SelectedIndexChanged(object sender, EventArgs e)
@@ -357,7 +392,7 @@ namespace MemoryProgrammer
                     ic = new MemoryProgrammer.IC.EEPROM_93C66(portName, 50, this);
                 else
                     return;
-
+                timer1.Enabled = true;
                 try { ic.StartTransfer(); }
                 catch (Exception err) { MessageBox.Show(err.Message); return; }
 
@@ -366,10 +401,13 @@ namespace MemoryProgrammer
                 {
                     UInt32 val = ic.EEPROM_93C66_spi_read_data(x);
                     hex += val.ToString("X4");
+                    progress = x / 256 * 100;
                 }
                 ic.StopTransfer();
                 this.BeginInvoke(new SetTextDeleg(tampilkanData),
                 new object[] { hex });
+                byteviewer.SetBytes(StringToByteArray(hex));
+                progress = 100;
             }
         }
 
@@ -397,6 +435,12 @@ namespace MemoryProgrammer
             {
                 // ReadDataSerial.Dispose();
                 MessageBox.Show(ee.Message, "Error");
+                try
+                {
+                    if (ReadDataSerial.IsOpen) ReadDataSerial.Close();
+                }
+                catch { }
+
             }
 
             ReadDataSerial.WriteLine("r");
@@ -409,14 +453,16 @@ namespace MemoryProgrammer
             
             int intReturnASCII = 0;
             int count = 0;
-            while (count < 512) { 
-                count = ReadDataSerial.BytesToRead;
+            while (count < 512) {
+                try { count = ReadDataSerial.BytesToRead; }
+                catch { }
                 progress = (int)(count * 100 / 512);
             }
             string returnMessage = "";
             while (count > 0)
             {
-                intReturnASCII = ReadDataSerial.ReadByte();
+                try { intReturnASCII = ReadDataSerial.ReadByte(); }
+                catch { }
                 returnMessage = returnMessage + Convert.ToChar(intReturnASCII);
                 count--;
             }
@@ -425,7 +471,20 @@ namespace MemoryProgrammer
             
             if (ReadDataSerial.IsOpen)
                 ReadDataSerial.Close();
+            byteviewer.SetBytes(StringToByteArray(textBoxString.Text));
+
             progress = 100;
+        }
+        public static byte[] StringToByteArray(string hex)
+        {
+            return Enumerable.Range(0, hex.Length)
+                             .Where(x => x % 2 == 0)
+                             .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                             .ToArray();
+        }
+        private void button4_Click(object sender, EventArgs e)
+        {
+            byteviewer.SetBytes(new byte[] { });
         }
 
     }
